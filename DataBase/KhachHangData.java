@@ -6,4 +6,14 @@ public class KhachHangData {
 	public String diachi;
 	public String sdt;
 	public String rank;
+	
+	public KhachHangData() {
+	}
+	public KhachHangData(int iid, String ihoten, String idiachi, String isdt, String irank) {
+		id = iid;
+		hoten = ihoten;
+		diachi = idiachi;
+		sdt = isdt;
+		rank = irank;
+	}
 }

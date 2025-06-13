@@ -4,10 +4,15 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import DataBase.*;
 import KhachHangFactoryMethod.*;
+
 
 public class KhachHangPanel extends JPanel {
     private JTextField txtMaKH, txtTenKH, txtSDT;
@@ -84,6 +89,7 @@ public class KhachHangPanel extends JPanel {
         // Bảng dữ liệu
         model = new DefaultTableModel(new String[]{"Mã KH", "Tên KH", "SĐT", "Địa chỉ", "Loại KH"}, 0);
         table = new JTable(model);
+        loadKh();
         add(new JScrollPane(table), BorderLayout.CENTER);
 
         // Sự kiện nút
@@ -119,6 +125,36 @@ public class KhachHangPanel extends JPanel {
                 }
             }
         });
+    }
+    
+    public void loadKh() {
+    	model.setRowCount(0);
+        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/btl", "root", "");
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM khachhang")) {
+            model.setRowCount(0); // Clear table
+            while (rs.next()) {
+                int ma = rs.getInt("id");
+                String hoten = rs.getString("hoten");
+                String sdt = rs.getString("sdt");
+                String diachi = rs.getString("diachi");
+                String loai = rs.getString("rank");
+                model.addRow(new Object[]{ma+"", hoten, sdt, diachi, loai});
+                
+                KhachHangFactory kh = null;
+                if(loai.equals("thường")) {
+                	kh = new KhachTgFac();
+                }
+                else if(loai.equals("vip")) {
+                	kh = new KhachVipFac();
+                }
+                danhSachKH.add(kh);
+                danhSachId.add(ma);
+                
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     private void themKhachHang() {
@@ -166,29 +202,43 @@ public class KhachHangPanel extends JPanel {
         int row = table.getSelectedRow();
         if(row < 0) return;
         
-        KhachHangFactory kh = danhSachKH.get(row);
-        int id = danhSachId.get(row);
-        String in4 = kh.getInfo(id);
-        String[] arrin4 = in4.split("\\|");
-
-        String ma = arrin4[0];
-        String ten = arrin4[1];
-        String sdt = arrin4[3];
-        String diachi = arrin4[2];
-        String loai = kh.getRank(id);
-
+        String ma = txtMaKH.getText().trim();
+        String ten = txtTenKH.getText().trim();
+        String sdt = txtSDT.getText().trim();
+        String diachi = txtDiaChi.getText().trim();
+        String loai = cbLoaiKH.getSelectedItem().toString();
+        int id = Integer.parseInt(ma);
         
         try {
 			KhachHangDB.SuaKh(id, ten, diachi, sdt, loai);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+        
+        KhachHangFactory kh = danhSachKH.get(row);
+        
+        if(kh.getRank(id) != loai) {
+        	kh = null;
+        	if(loai == "thường")
+        		kh = new KhachTgFac();
+        	else
+        		kh = new KhachVipFac();
+        }
+        		
+        String in4 = kh.getInfo(id);
+        String[] arrin4 = in4.split("\\|");
 
-        model.setValueAt(ma, row, 0);
-        model.setValueAt(ten, row, 1);
-        model.setValueAt(sdt, row, 2);
-        model.setValueAt(diachi, row, 3);
-        model.setValueAt(loai, row, 4);
+        String mams = arrin4[0];
+        String tenms = arrin4[1];
+        String sdtms = arrin4[3];
+        String diachims = arrin4[2];
+        String loaims = kh.getRank(id);
+
+        model.setValueAt(mams, row, 0);
+        model.setValueAt(tenms, row, 1);
+        model.setValueAt(sdtms, row, 2);
+        model.setValueAt(diachims, row, 3);
+        model.setValueAt(loaims, row, 4);
         clearForm();
     }
 
@@ -231,7 +281,7 @@ public class KhachHangPanel extends JPanel {
         cbLoaiKH.setSelectedIndex(0);
         table.clearSelection();
     }
-
+    
     public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		JPanel kh = new KhachHangPanel();

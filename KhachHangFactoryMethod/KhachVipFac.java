@@ -1,11 +1,13 @@
 package KhachHangFactoryMethod;
 
+import DataBase.KhachHangData;
+
 public class KhachVipFac extends KhachHangFactory{
 
 	@Override
-	public KhachHang taoKhachHang() {
+	public KhachHang taoKhachHang(KhachHangData ikh) {
 		// TODO Auto-generated method stub
-		return new KhachVip();
+		return new KhachVip(ikh.id, ikh.hoten, ikh.diachi, ikh.sdt);
 	}
 	
 }

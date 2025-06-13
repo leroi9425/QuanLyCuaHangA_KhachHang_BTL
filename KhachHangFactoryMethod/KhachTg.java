@@ -1,25 +1,31 @@
 package KhachHangFactoryMethod;
 
 public class KhachTg implements KhachHang {
+	private int id;
 	private String hoten;
 	private String diachi;
 	private String sdt;
 	
 	public KhachTg() {
-		hoten = "Nguyen Van A";
-		diachi = "175 Tay Son";
-		sdt = "0912345";
+		
+	}
+	public KhachTg(int iid, String ihoten, String idiachi, String isdt) {
+		System.out.println("iid: " + iid);
+		id = iid;
+		hoten = ihoten;
+		diachi = idiachi;
+		sdt = isdt;
 	}
 	
 	@Override
 	public String getRank() {
 		// TODO Auto-generated method stub
-		return "Khách thường";
+		return "thường";
 	}
 	@Override
 	public String getInfo() {
 		// TODO Auto-generated method stub
-		return hoten + " " + diachi + " " + sdt;
+		return id + "|" + hoten + "|" + diachi + "|" + sdt;
 	}
 	
 }
